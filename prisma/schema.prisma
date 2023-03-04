@@ -1,0 +1,60 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
+}
+
+model Championship {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  createdAt DateTime @default(now())
+
+  game Game[]
+}
+
+model Team {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  shieldUrl String
+  createdAt DateTime @default(now())
+
+  GameTeamHome Game[] @relation("teamHome")
+  GameTeamAway Game[] @relation("teamAway")
+}
+
+model Stadium {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  address   String
+  createdAt DateTime @default(now())
+
+  game Game[]
+}
+
+model Game {
+  id             Int      @id @default(autoincrement())
+  eventType      String
+  startDate      DateTime
+  createdAt      DateTime @default(now())
+  stadiumId      Int
+  teamHomeId     Int
+  teamAwayId     Int
+  championshipId Int
+
+  TeamHome     Team         @relation("teamHome", fields: [teamHomeId], references: [id])
+  TeamAway     Team         @relation("teamAway", fields: [teamAwayId], references: [id])
+  Stadium      Stadium      @relation(fields: [stadiumId], references: [id])
+  Championship Championship @relation(fields: [championshipId], references: [id])
+
+  @@index([teamHomeId])
+  @@index([teamAwayId])
+  @@index([stadiumId])
+  @@index([championshipId])
+}
